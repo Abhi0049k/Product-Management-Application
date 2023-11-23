@@ -6,18 +6,6 @@ import (
 	"github.com/lib/pq"
 )
 
-// type Product struct {
-// 	gorm.Model
-// 	ProductID               int
-// 	ProductName             string
-// 	ProductDescription      string
-// 	ProductImages           pq.StringArray
-// 	ProductPrice            float64
-// 	CompressedProductImages pq.StringArray
-// 	CreatedAt               time.Time
-// 	UpdatedAt               time.Time
-// }
-
 type Product struct {
 	ProductID               int            `gorm:"primary_key" json:"product_id"`
 	ProductName             string         `json:"product_name"`
