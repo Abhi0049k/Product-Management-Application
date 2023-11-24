@@ -15,13 +15,16 @@ func init() {
 func main() {
 	r := gin.Default()
 
+	userController := &controllers.UserController{}
+	productController := &controllers.ProductController{}
+
 	// Routes for Users
-	r.GET("/users", controllers.GetUsers)
-	r.POST("/users", controllers.CreateUser)
+	r.GET("/users", userController.GetUsers)
+	r.POST("/users", userController.CreateUser)
 
 	// Routes for Products
-	r.GET("/products", controllers.GetProducts)
-	r.POST("/products", controllers.CreateProduct)
+	r.GET("/products", productController.GetProducts)
+	r.POST("/products", productController.CreateProduct)
 
 	r.Run()
 }

@@ -3,36 +3,35 @@ package controllers
 import (
 	"Product-Management-Application/initializers"
 	"Product-Management-Application/models"
-	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
+type UserController struct {
+}
+
 // To fetch all the users present in the db
 
-func GetUsers(c *gin.Context) {
+func (uc *UserController) GetUsers(c *gin.Context) {
 	var users []models.User
 	if err := initializers.DB.Find(&users).Error; err != nil {
 		c.AbortWithStatus(500)
-		fmt.Println(err)
-	} else {
-		c.JSON(200, users)
+		return
 	}
+	c.JSON(http.StatusOK, users)
 }
 
 // To create a new user
 
-func CreateUser(c *gin.Context) {
-	var body struct {
-		Name      string
-		Mobile    string
-		Latitude  float32
-		Longitude float32
-		CreatedAt time.Time
-		UpdatedAt time.Time
+func (uc *UserController) CreateUser(c *gin.Context) {
+	var body models.User
+	if err := c.BindJSON(&body); err != nil {
+		c.AbortWithStatus(500)
+		return
 	}
-	c.BindJSON(&body)
+
 	body.CreatedAt = time.Now()
 	body.UpdatedAt = time.Now()
 
@@ -48,9 +47,8 @@ func CreateUser(c *gin.Context) {
 	result := initializers.DB.Create(&user)
 
 	if result.Error != nil {
-		c.Status(400)
+		c.AbortWithStatus(500)
 		return
 	}
-
-	c.JSON(200, user)
+	c.JSON(http.StatusOK, user)
 }

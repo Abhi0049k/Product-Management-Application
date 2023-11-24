@@ -4,29 +4,32 @@ import (
 	"Product-Management-Application/helpers"
 	"Product-Management-Application/initializers"
 	"Product-Management-Application/models"
-	"fmt"
 	"log"
+	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/lib/pq"
 )
 
+type ProductController struct {
+}
+
 // To fetch all the products present in the db
 
-func GetProducts(c *gin.Context) {
+func (pc *ProductController) GetProducts(c *gin.Context) {
 	var products []models.Product
 	if err := initializers.DB.Find(&products).Error; err != nil {
-		c.AbortWithStatus(500)
-		fmt.Println(err)
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
 	} else {
-		c.JSON(200, products)
+		c.JSON(http.StatusOK, products)
 	}
 }
 
 // To create new Product
 
-func CreateProduct(c *gin.Context) {
+func (pc *ProductController) CreateProduct(c *gin.Context) {
 	var body struct {
 		UserID             uint           `json:"user_id"`
 		ProductName        string         `json:"product_name"`
@@ -36,7 +39,12 @@ func CreateProduct(c *gin.Context) {
 		CreatedAt          time.Time
 		UpdatedAt          time.Time
 	}
-	c.BindJSON(&body)
+	// c.BindJSON(&body)
+
+	if err := c.BindJSON(&body); err != nil {
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
 
 	body.CreatedAt = time.Now()
 
@@ -65,10 +73,10 @@ func CreateProduct(c *gin.Context) {
 	result := initializers.DB.Create(&product)
 
 	if result.Error != nil {
-		c.Status(400)
+		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
-	c.JSON(200, gin.H{
+	c.JSON(http.StatusOK, gin.H{
 		"msg":     "Product Created",
 		"product": product,
 	})
