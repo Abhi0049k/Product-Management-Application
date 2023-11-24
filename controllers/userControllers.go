@@ -9,6 +9,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// To fetch all the users present in the db
+
 func GetUsers(c *gin.Context) {
 	var users []models.User
 	if err := initializers.DB.Find(&users).Error; err != nil {
@@ -19,12 +21,14 @@ func GetUsers(c *gin.Context) {
 	}
 }
 
+// To create a new user
+
 func CreateUser(c *gin.Context) {
 	var body struct {
 		Name      string
 		Mobile    string
-		Latitude  float64
-		Longitude float64
+		Latitude  float32
+		Longitude float32
 		CreatedAt time.Time
 		UpdatedAt time.Time
 	}
@@ -32,7 +36,14 @@ func CreateUser(c *gin.Context) {
 	body.CreatedAt = time.Now()
 	body.UpdatedAt = time.Now()
 
-	user := models.User{Name: body.Name, Mobile: body.Mobile, Latitude: body.Latitude, Longitude: body.Longitude, CreatedAt: body.CreatedAt, UpdatedAt: body.UpdatedAt}
+	user := models.User{
+		Name:      body.Name,
+		Mobile:    body.Mobile,
+		Latitude:  body.Latitude,
+		Longitude: body.Longitude,
+		CreatedAt: body.CreatedAt,
+		UpdatedAt: body.UpdatedAt,
+	}
 
 	result := initializers.DB.Create(&user)
 

@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 )
 
+// To Download the image and store it in images folder
+
 func DownloadImage(url, destination string) error {
 	response, err := http.Get(url)
 	if err != nil {

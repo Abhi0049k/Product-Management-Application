@@ -8,6 +8,8 @@ import (
 	"github.com/nfnt/resize"
 )
 
+// To Compress and download the image
+
 func CompressImage(source, destination string, maxWidth, maxHeight uint) error {
 	file, err := os.Open(source)
 
@@ -36,5 +38,4 @@ func CompressImage(source, destination string, maxWidth, maxHeight uint) error {
 	}
 
 	return nil
-
 }

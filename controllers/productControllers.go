@@ -6,13 +6,13 @@ import (
 	"Product-Management-Application/models"
 	"fmt"
 	"log"
-	"os"
-	"path/filepath"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/lib/pq"
 )
+
+// To fetch all the products present in the db
 
 func GetProducts(c *gin.Context) {
 	var products []models.Product
@@ -24,13 +24,15 @@ func GetProducts(c *gin.Context) {
 	}
 }
 
+// To create new Product
+
 func CreateProduct(c *gin.Context) {
 	var body struct {
 		UserID             uint           `json:"user_id"`
 		ProductName        string         `json:"product_name"`
 		ProductDescription string         `json:"product_description"`
 		ProductImages      pq.StringArray `json:"product_images" gorm:"type:text[]"`
-		ProductPrice       float64        `json:"product_price"`
+		ProductPrice       uint32         `json:"product_price"`
 		CreatedAt          time.Time
 		UpdatedAt          time.Time
 	}
@@ -40,45 +42,32 @@ func CreateProduct(c *gin.Context) {
 
 	body.UpdatedAt = time.Now()
 
-	var localFilePaths []string
+	// Running the image analysis
 
-	var compressedFilePaths []string
+	localFilePaths, compressedFilePaths, err := helpers.DownloadImages(body.ProductImages)
 
-	for _, imageURL := range body.ProductImages {
-		fileName := fmt.Sprintf("image_%d%s", time.Now().UnixNano(), filepath.Ext(imageURL))
-		destination := filepath.Join("./images", fileName)
-		destination = filepath.ToSlash(destination)
-		localFilePaths = append(localFilePaths, destination)
-		err := helpers.DownloadImage(imageURL, destination)
-		if err != nil {
-			log.Fatal("Error:", err.Error())
-		}
-
-		compressedFileName := fmt.Sprintf("compressed_%d%s", time.Now().UnixNano(), filepath.Ext(imageURL))
-		compressedDestination := filepath.Join("./compressed-images", compressedFileName)
-		compressedDestination = filepath.ToSlash(compressedDestination)
-		err = os.MkdirAll(filepath.Dir(compressedDestination), os.ModePerm)
-
-		if err != nil {
-			log.Fatal("Error:", err.Error())
-		}
-
-		err = helpers.CompressImage(destination, compressedDestination, 100, 100)
-		if err != nil {
-			log.Fatal("Error:", err.Error())
-		}
-
-		compressedFilePaths = append(compressedFilePaths, compressedDestination)
+	if err != nil {
+		log.Fatal("Error:", err.Error())
 	}
 
-	product := models.Product{ProductName: body.ProductName, ProductDescription: body.ProductDescription, ProductImages: localFilePaths, CreatedAt: body.CreatedAt, UpdatedAt: body.UpdatedAt, CompressedProductImages: compressedFilePaths}
+	// Storing the product in the database
 
-	// result := initializers.DB.Create(&product)
+	product := models.Product{
+		ProductName:             body.ProductName,
+		ProductDescription:      body.ProductDescription,
+		ProductImages:           localFilePaths,
+		ProductPrice:            body.ProductPrice,
+		CreatedAt:               body.CreatedAt,
+		UpdatedAt:               body.UpdatedAt,
+		CompressedProductImages: compressedFilePaths,
+	}
 
-	// if result.Error != nil {
-	// 	c.Status(400)
-	// 	return
-	// }
+	result := initializers.DB.Create(&product)
+
+	if result.Error != nil {
+		c.Status(400)
+		return
+	}
 	c.JSON(200, gin.H{
 		"msg":     "Product Created",
 		"product": product,
