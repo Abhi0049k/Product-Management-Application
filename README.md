@@ -8,10 +8,15 @@ language for a product management application.
 
 ## Features
 List out the key features of your application.
+
 1- Create User / Fetch User
+
 2- Create Product / Fetch Products
+
 3- Image Analysis
+
 4- Testing and Benchmarking
+
 
 ## Endpoints:
 
